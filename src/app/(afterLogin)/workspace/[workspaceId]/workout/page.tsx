@@ -21,9 +21,10 @@ import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
 import { userMissions } from '@/api/workspace';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getBookmarks, postBookmark } from '@/api/workout';
 import { useWorkoutStore } from '@/hooks/useWorkout';
+import { sendFCMNotification } from '@/action/sendFCM';
 
 type TMission = {
   id: number;
@@ -88,6 +89,21 @@ export default function Page() {
     }
   };
 
+  const handleTest = async () => {
+    try {
+      const res = await sendFCMNotification({
+        title: '테스트 알림', // 알림 제목
+        body: '이것은 테스트 알림입니다.', // 알림 내용
+        token: localStorage.getItem('fcmToken') as string, // 실제 클라이언트에서 생성된 FCM 토큰
+        image: '/images/basicIcon.png', // 선택: 아이콘 또는 이미지 경로
+        click_action: 'https://example.com', // 선택: 알림 클릭 시 이동할 URL
+      });
+      console.log('FCM 전송 성공:', res);
+    } catch (error) {
+      console.error('FCM 전송 실패:', error);
+    }
+  };
+
   const getMissionCount = (missionId: number) => {
     const mission = workoutInfo.missions.find((item) => item.id === missionId);
     return mission ? mission.count : 0;
@@ -96,6 +112,17 @@ export default function Page() {
   const isMissionCompleted = (missionId: number) =>
     getMissionCount(missionId) > 0;
 
+  useEffect(() => {
+    if (Notification.permission !== 'granted') {
+      Notification.requestPermission().then((permission) => {
+        if (permission === 'granted') {
+          console.log('알림 권한 허용됨');
+        } else {
+          console.warn('알림 권한 거부됨');
+        }
+      });
+    }
+  }, []);
   return (
     <div>
       <div className="flex justify-start items-center text-xs gap-2 mb-4">
@@ -118,6 +145,9 @@ export default function Page() {
           onClick={() => setBookmark('bookmark')}
         >
           즐겨찾기
+        </div>
+        <div className="bg-blue-500" onClick={handleTest}>
+          fcm text
         </div>
       </div>
 
