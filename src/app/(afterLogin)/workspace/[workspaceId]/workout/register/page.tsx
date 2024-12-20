@@ -16,6 +16,10 @@ import { Input } from '@/components/ui/input';
 import { s3PutPresifnedUrls, workout } from '@/api/workout';
 import { useParams, useRouter } from 'next/navigation';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { compressingImage } from '@/utils/image/compressingImage';
+import ButtonLoading from '@/app/(afterLogin)/_components/ButtonLoading';
+import { AxiosError } from 'axios';
+import { MyErrorResponse } from '@/types/error';
 
 export default function Page() {
   const { workspaceId } = useParams();
@@ -25,14 +29,18 @@ export default function Page() {
   const [open, setOpen] = useState(false);
   const [imagePreview, setImagePreview] = useState<File | null>(null);
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const { workoutInfo } = useWorkoutStore();
 
   const router = useRouter();
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImagePreview(file);
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.length) return;
+
+    const compressedImage = await compressingImage(e);
+    if (compressedImage) {
+      setImagePreview(compressedImage);
     }
   };
 
@@ -51,6 +59,7 @@ export default function Page() {
   };
 
   const handleSubmit = async () => {
+    setIsLoading(true);
     if (imagePreview) {
       const imageUrl = await s3PutPresifnedUrls(imagePreview);
 
@@ -64,10 +73,21 @@ export default function Page() {
       try {
         const workoutRes = await workout({ workspaceId: id, data });
         console.log(workoutRes);
+        setIsLoading(false);
         if (workoutRes.status === 200) {
           setOpen(true);
         }
       } catch (error) {
+        setIsLoading(false);
+        const axiosError = error as AxiosError<MyErrorResponse>;
+        if (axiosError.response?.data?.errorCode === 'INVALID_STATE') {
+          alert('일일 가능한 운동을 초과했어요!');
+        } else {
+          alert(
+            axiosError?.response?.data?.message ||
+              '알 수 없는 에러가 발생했습니다.',
+          );
+        }
         console.log(error);
       }
     } else {
@@ -186,8 +206,9 @@ export default function Page() {
           className={`py-3 w-[90%] bg-main text-white
              rounded-full flex justify-center items-center text-base`}
           onClick={handleSubmit}
+          disabled={isLoading}
         >
-          <span>인증 등록하기</span>
+          {isLoading ? <ButtonLoading /> : <span>인증 등록하기</span>}
         </button>
       </div>
       <Dialog open={open} onOpenChange={(open) => setOpen(open)}>
