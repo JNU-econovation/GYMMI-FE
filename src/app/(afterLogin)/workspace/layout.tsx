@@ -43,7 +43,7 @@ export default function Layout({ children }: Props) {
           {currentSegment !== 'workspaceConfirmationObjectionList' && (
             <hr className='border-1 border-[#E5E7EB] w-screen -mx-4' />
           )}
-          {currentSegment === 'workspaceConfirmaionDetail' ||
+          {currentSegment === 'workspaceConfirmationDetail' ||
           currentSegment === 'workspaceConfirmationObjectionList' ? (
             <></>
           ) : (

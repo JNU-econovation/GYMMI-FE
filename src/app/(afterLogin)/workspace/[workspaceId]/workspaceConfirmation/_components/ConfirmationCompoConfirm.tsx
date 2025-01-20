@@ -17,7 +17,7 @@ export default function ConfirmationCompoConfirm({
     <div id={`confirmation-${workoutConfirmationPage.objectionId}`}>
       <Link
         href={{
-          pathname: `/workspace/${workspaceId}/workspaceConfirmation/workspaceConfirmaionDetail`,
+          pathname: `/workspace/${workspaceId}/workspaceConfirmation/workspaceConfirmationDetail`,
           query: {
             workoutConfirmationId:
               workoutConfirmationPage.workoutConfirmationId,

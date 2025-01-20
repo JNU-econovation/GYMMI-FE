@@ -1,8 +1,12 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
 
 import objectionBellFill from '@/../public/svgs/workspace/workspaceConfirmaion/objectionBellFill.svg';
 import { IWorkoutConfirmationObjectionListPageProps } from '@/types/workoutConfirmation';
+import { useMutation } from '@tanstack/react-query';
+import { confirmationDetailVoteMutationFn } from '@/api/workspaceConfirmaion';
 
 interface IWorkoutConfirmationObjectionList {
   workoutConfirmationObjectionListPages:
@@ -15,8 +19,18 @@ export default function WorkoutConfirmationObjectionList({
   workoutConfirmationObjectionListPages,
   workspaceId,
 }: IWorkoutConfirmationObjectionList) {
+  const confirmationDetailVoteMutation = useMutation({
+    mutationFn: () => confirmationDetailVoteMutationFn({ workspaceId }),
+    onSuccess: () => {
+      console.log('상세 인증 투표 상태 요청 성공');
+    },
+    onError: () => {
+      console.error('상세 인증 투표 상태 에러 발생');
+    },
+  });
+
   return (
-    <div>
+    <div onClick={() => confirmationDetailVoteMutation.mutate()}>
       {workoutConfirmationObjectionListPages?.map(
         (
           workoutConfirmationObjectionListPage: IWorkoutConfirmationObjectionListPageProps
@@ -31,7 +45,7 @@ export default function WorkoutConfirmationObjectionList({
             >
               <Link
                 href={{
-                  pathname: `/workspace/${workspaceId}/workspaceConfirmation/workspaceConfirmaionDetail`,
+                  pathname: `/workspace/${workspaceId}/workspaceConfirmation/workspaceConfirmationDetail`,
                   query: {
                     workoutConfirmationId:
                       workoutConfirmationObjectionListPage.workoutConfirmationId,

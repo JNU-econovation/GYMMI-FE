@@ -29,7 +29,7 @@ export default function ProgressBar({
       <div
         className={`text-sm 
          ${isObjectionVote ? 'text-[#374151]' : 'text-[#848D99]'}
-         w-5/6 absolute left-5 inset-y-2.5 flex justify-between`}
+         w-[295px] absolute left-5 inset-y-2.5 flex justify-between`}
       >
         <div>{comment}</div>
         <div>
